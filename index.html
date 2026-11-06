@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UpstreamMesh · Resilient Watershed Telemetry &amp; FOSS Infrastructure</title>
+  <meta name="description" content="Open-source, solar-powered environmental telemetry and disaster communication mesh designed for flood-prone and infrastructure-limited basins.">
+  <meta name="theme-color" content="#0a0c0e">
+  <link rel="canonical" href="https://upstreammesh.org/">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <meta property="og:title" content="UpstreamMesh">
+  <meta property="og:description" content="Open-source, solar-powered environmental telemetry and disaster communication mesh for flood-prone river basins.">
+  <meta property="og:url" content="https://upstreammesh.org/">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&amp;family=Outfit:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0c0e;
+      --bg-raise: #101318;
+      --card-bg: #111418;
+      --border: #232931;
+      --border-accent: #3b4252;
+      --text-main: #eceff4;
+      --text-muted: #9aa5b5;
+      --accent-cyan: #00e5ff;
+      --accent-amber: #e5c07b;
+      --mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+      --sans: Outfit, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --wrap: 1080px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: var(--sans);
+      font-size: 1.02rem;
+      line-height: 1.6;
+      background-image:
+        radial-gradient(ellipse 70% 45% at 0% -10%, rgba(0, 229, 255, 0.09), transparent 55%),
+        radial-gradient(ellipse 50% 40% at 100% 0%, rgba(229, 192, 123, 0.07), transparent 50%),
+        linear-gradient(rgba(255, 255, 255, 0.028) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.028) 1px, transparent 1px);
+      background-size: auto, auto, 56px 56px, 56px 56px;
+      background-attachment: fixed;
+    }
+
+    ::selection {
+      background: rgba(0, 229, 255, 0.28);
+      color: #fff;
+    }
+
+    a { color: inherit; }
+    :focus-visible {
+      outline: 2px solid var(--accent-cyan);
+      outline-offset: 3px;
+    }
+
+    .skip {
+      position: absolute;
+      left: 1rem;
+      top: -4rem;
+      background: var(--accent-cyan);
+      color: #050708;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      padding: 0.5rem 0.8rem;
+      z-index: 20;
+    }
+    .skip:focus { top: 0.75rem; }
+
+    .wrap {
+      width: min(var(--wrap), calc(100% - 2.5rem));
+      margin-inline: auto;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      border-bottom: 1px solid var(--border);
+      background: rgba(10, 12, 14, 0.78);
+      backdrop-filter: blur(16px);
+    }
+    .header-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.9rem 0;
+      flex-wrap: wrap;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.7rem;
+      font-family: var(--mono);
+      font-weight: 600;
+      font-size: 0.92rem;
+      letter-spacing: 0.08em;
+      text-decoration: none;
+    }
+    .mark {
+      width: 28px;
+      height: 28px;
+      flex: none;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 10px var(--accent-cyan);
+      animation: pulse 2.6s ease-in-out infinite;
+    }
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+    }
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.02em;
+      padding: 0.38rem 0.7rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+    .nav-links a:hover {
+      color: var(--text-main);
+      border-color: var(--accent-cyan);
+      background: rgba(0, 229, 255, 0.05);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) minmax(280px, 0.85fr);
+      gap: 2.5rem;
+      align-items: end;
+      padding: 4.25rem 0 3.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      color: var(--accent-cyan);
+      border: 1px solid rgba(0, 229, 255, 0.35);
+      padding: 0.28rem 0.6rem;
+      border-radius: 3px;
+      text-transform: uppercase;
+      margin-bottom: 1.1rem;
+    }
+    h1 {
+      font-size: clamp(2.35rem, 5vw, 3.7rem);
+      font-weight: 650;
+      line-height: 1.02;
+      letter-spacing: -0.035em;
+      margin: 0 0 1.1rem;
+      text-wrap: balance;
+    }
+    .tagline {
+      font-size: 1.12rem;
+      color: var(--text-muted);
+      max-width: 40rem;
+      margin: 0 0 1.25rem;
+    }
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      list-style: none;
+      padding: 0;
+      margin: 0 0 1.5rem;
+    }
+    .chips li {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      background: rgba(17, 20, 24, 0.7);
+      border-radius: 99px;
+      padding: 0.22rem 0.6rem;
+    }
+    .core-principle {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent-amber);
+      padding: 0.95rem 1.15rem 1rem;
+      font-family: var(--mono);
+      font-size: 0.92rem;
+      margin-bottom: 1.6rem;
+    }
+    .core-principle span {
+      display: block;
+      margin-top: 0.35rem;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      line-height: 1.5;
+    }
+    .btn-group {
+      display: flex;
+      gap: 0.7rem;
+      flex-wrap: wrap;
+    }
+    .btn {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      padding: 0.75rem 1.05rem;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary {
+      background: var(--accent-cyan);
+      color: #050708;
+    }
+    .btn-primary:hover { background: #79f2ff; }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border-accent);
+      color: var(--text-main);
+    }
+    .btn-outline:hover { border-color: var(--accent-cyan); }
+
+    .plate {
+      position: relative;
+      background:
+        linear-gradient(180deg, rgba(20, 24, 29, 0.96), rgba(12, 14, 17, 0.96));
+      border: 1px solid var(--border-accent);
+      border-radius: 8px;
+      padding: 1.15rem 1.15rem 1rem;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+      font-family: var(--mono);
+    }
+    .plate-corner {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-color: var(--accent-amber);
+      border-style: solid;
+    }
+    .plate-corner.tl { top: 7px; left: 7px; border-width: 1px 0 0 1px; }
+    .plate-corner.tr { top: 7px; right: 7px; border-width: 1px 1px 0 0; }
+    .plate-corner.bl { bottom: 7px; left: 7px; border-width: 0 0 1px 1px; }
+    .plate-corner.br { bottom: 7px; right: 7px; border-width: 0 1px 1px 0; }
+    .plate-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      align-items: baseline;
+      color: var(--accent-amber);
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 0.9rem;
+    }
+    .plate-head span:last-child { color: var(--text-muted); letter-spacing: 0.06em; }
+    .plate dl {
+      margin: 0;
+      display: grid;
+      gap: 0.55rem;
+    }
+    .plate dl > div {
+      display: grid;
+      grid-template-columns: 6.6rem 1fr;
+      gap: 0.75rem;
+      padding-bottom: 0.55rem;
+      border-bottom: 1px solid rgba(35, 41, 49, 0.9);
+      font-size: 0.78rem;
+    }
+    .plate dt {
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+    }
+    .plate dd { margin: 0; color: var(--text-main); }
+    .plate-foot {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-top: 0.8rem;
+      font-size: 0.68rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+    .live-pip {
+      color: var(--accent-cyan);
+    }
+
+    section {
+      padding: 3.25rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-kicker {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent-amber);
+      margin: 0 0 0.45rem;
+    }
+    section h2 {
+      font-family: var(--sans);
+      font-size: clamp(1.6rem, 3vw, 2rem);
+      font-weight: 640;
+      letter-spacing: -0.03em;
+      text-transform: none;
+      margin: 0 0 0.55rem;
+    }
+    .section-intro {
+      color: var(--text-muted);
+      font-size: 1rem;
+      max-width: 44rem;
+      margin: 0 0 1.75rem;
+    }
+
+    .grid-3, .grid-2 {
+      display: grid;
+      gap: 1rem;
+    }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-2 { grid-template-columns: minmax(280px, 0.9fr) minmax(0, 1.1fr); align-items: start; }
+
+    .card {
+      background: rgba(17, 20, 24, 0.88);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.3rem 1.25rem 1.35rem;
+      min-width: 0;
+    }
+    .card:hover { border-color: rgba(0, 229, 255, 0.35); }
+    .index {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      color: var(--accent-cyan);
+      margin-bottom: 0.7rem;
+    }
+    .card h3 {
+      font-family: var(--sans);
+      font-size: 1.15rem;
+      font-weight: 620;
+      letter-spacing: -0.02em;
+      margin: 0 0 0.55rem;
+    }
+    .card p, .card li {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+    }
+    .card ul {
+      margin: 0.7rem 0 0;
+      padding-left: 1.05rem;
+    }
+    .card li { margin-bottom: 0.38rem; }
+    .card li::marker { color: var(--accent-cyan); }
+    .card strong { color: var(--text-main); font-weight: 600; }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: rgba(17, 20, 24, 0.88);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      min-width: 640px;
+    }
+    th, td {
+      text-align: left;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    tr:last-child td { border-bottom: 0; }
+    th {
+      color: var(--text-muted);
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-size: 0.68rem;
+      background: rgba(255, 255, 255, 0.02);
+    }
+    td:first-child {
+      color: var(--accent-cyan);
+      white-space: nowrap;
+    }
+    tbody tr:hover td { background: rgba(0, 229, 255, 0.035); }
+
+    .basin-card { padding: 0.4rem 0.4rem 0.9rem; }
+    .basin {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .basin text {
+      font-family: var(--mono);
+      fill: var(--text-main);
+    }
+    .basin .role { fill: var(--text-muted); }
+    .basin .amber { fill: var(--accent-amber); }
+    .flow-line {
+      fill: none;
+      stroke: var(--accent-cyan);
+      stroke-width: 1.6;
+      stroke-dasharray: 4 6;
+      stroke-linecap: round;
+      animation: flow 2.8s linear infinite;
+    }
+    .fail-line {
+      fill: none;
+      stroke: var(--accent-amber);
+      stroke-width: 1.25;
+      stroke-dasharray: 2 5;
+      stroke-linecap: round;
+      opacity: 0.85;
+    }
+    .river {
+      fill: none;
+      stroke: rgba(0, 229, 255, 0.18);
+      stroke-width: 16;
+      stroke-linecap: round;
+    }
+    .caption {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin: 0.35rem 0.85rem 0;
+    }
+    .stack { display: grid; gap: 1rem; }
+    .constraints {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.55rem 1rem;
+      list-style: none;
+      padding: 0;
+      margin: 1rem 0 0;
+    }
+    .constraints li {
+      margin: 0;
+      padding-left: 0.9rem;
+      position: relative;
+      color: var(--text-main);
+      font-size: 0.88rem;
+    }
+    .constraints li::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent-amber);
+      position: absolute;
+      left: 0;
+      top: 0.45rem;
+    }
+
+    footer {
+      width: min(var(--wrap), calc(100% - 2.5rem));
+      margin: 0 auto;
+      padding: 1.6rem 0 2.4rem;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.5rem;
+    }
+    footer a { color: var(--text-main); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+    @keyframes flow {
+      to { stroke-dashoffset: -40; }
+    }
+
+    @media (max-width: 900px) {
+      .hero, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+      .hero { padding-top: 2.6rem; }
+      .constraints { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 700px) {
+      .table-wrap { overflow: visible; }
+      table { min-width: 0; }
+      table thead { display: none; }
+      table tr { display: block; border-bottom: 1px solid var(--border); }
+      table td {
+        display: block;
+        border-bottom: 0;
+        padding: 0.2rem 1rem;
+        white-space: normal;
+      }
+      table td:first-child { padding-top: 0.9rem; }
+      table td:last-child { padding-bottom: 0.9rem; }
+      table td::before {
+        content: attr(data-label);
+        display: block;
+        color: var(--text-muted);
+        font-size: 0.65rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+    }
+    @media (max-width: 560px) {
+      .wrap, footer { width: min(var(--wrap), calc(100% - 1.5rem)); }
+      .plate dl > div { grid-template-columns: 1fr; gap: 0.15rem; }
+      h1 { font-size: 2.15rem; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header>
+    <div class="wrap header-inner">
+      <a href="#top" class="brand" id="top">
+        <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
+          <rect x="1" y="1" width="30" height="30" rx="6" fill="#111418" stroke="#232931"/>
+          <path d="M7 23c3.2-4.6 5.2-4.4 7.4-8.2C16.4 11 18.6 12 22 8" fill="none" stroke="#e5c07b" stroke-width="1.6" stroke-linecap="round"/>
+          <circle cx="22" cy="8" r="2.1" fill="#00e5ff"/>
+        </svg>
+        UPSTREAM_MESH
+        <span class="status-dot" aria-hidden="true"></span>
+      </a>
+      <nav class="nav-links" aria-label="Primary">
+        <a href="#systems">Architecture</a>
+        <a href="#specs">Hardware</a>
+        <a href="#topology">Pilot</a>
+        <a href="https://github.com/Is0cre/UpstreamMesh" target="_blank" rel="noopener">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="wrap">
+      <section class="hero">
+        <div>
+          <div class="badge">Open-source telemetry · Mesh protocol</div>
+          <h1>Distributed environmental sensing &amp; community resilience.</h1>
+          <p class="tagline">
+            Low-power, solar-powered environmental monitoring and disaster communication for flood-prone, infrastructure-vulnerable river corridors.
+          </p>
+          <ul class="chips" aria-label="Sensing surface">
+            <li>River level</li>
+            <li>Rainfall</li>
+            <li>Pressure</li>
+            <li>Turbidity</li>
+            <li>Conductivity</li>
+            <li>pH</li>
+            <li>Seismic</li>
+            <li>Hydrophone</li>
+          </ul>
+          <div class="core-principle">
+            &gt;&gt;&gt; PRINCIPLE: "Do not create dependency."
+            <span>Systems stay repairable, extensible, and fully operational offline for local governments, responders, and river communities.</span>
+          </div>
+          <div class="btn-group">
+            <a href="https://github.com/Is0cre/UpstreamMesh" class="btn btn-primary" target="_blank" rel="noopener">View the repository</a>
+            <a href="#specs" class="btn btn-outline">Technical specs</a>
+            <a href="#topology" class="btn btn-outline">5-node topology</a>
+          </div>
+        </div>
+
+        <aside class="plate" aria-label="Reference operating frame">
+          <span class="plate-corner tl" aria-hidden="true"></span>
+          <span class="plate-corner tr" aria-hidden="true"></span>
+          <span class="plate-corner bl" aria-hidden="true"></span>
+          <span class="plate-corner br" aria-hidden="true"></span>
+          <div class="plate-head">
+            <span>Reference frame</span>
+            <span>Schematic</span>
+          </div>
+          <dl>
+            <div>
+              <dt>Routing</dt>
+              <dd>Multi-hop store-and-forward</dd>
+            </div>
+            <div>
+              <dt>Failover</dt>
+              <dd>Dynamic path, rated link health</dd>
+            </div>
+            <div>
+              <dt>Security</dt>
+              <dd>Signed broadcast frames</dd>
+            </div>
+            <div>
+              <dt>Alerts</dt>
+              <dd>Emergency propagation, local cache</dd>
+            </div>
+            <div>
+              <dt>Uplink</dt>
+              <dd>Optional. Buffered at the edge.</dd>
+            </div>
+            <div>
+              <dt>Required</dt>
+              <dd>No cell, grid, or cloud</dd>
+            </div>
+          </dl>
+          <div class="plate-foot">
+            <span class="live-pip">MeshCore · sub-GHz</span>
+            <span>Not a live feed</span>
+          </div>
+        </aside>
+      </section>
+
+      <section id="systems">
+        <p class="section-kicker">01 — Stack</p>
+        <h2>System architecture</h2>
+        <p class="section-intro">A modular stack that keeps working without cellular networks, a power grid, or a cloud account.</p>
+        <div class="grid-3">
+          <article class="card">
+            <div class="index">01 / SENSE</div>
+            <h3>Environmental telemetry</h3>
+            <p>Edge sensing for upstream hydrology and the local microclimate.</p>
+            <ul>
+              <li>Ultrasonic and radar river level</li>
+              <li>Tipping-bucket rainfall</li>
+              <li>Barometric pressure, temperature, and humidity</li>
+              <li>Turbidity, conductivity, and pH</li>
+              <li>Seismic vibration and soil saturation</li>
+              <li>Passive bioacoustics and a hydrophone bus</li>
+            </ul>
+          </article>
+          <article class="card">
+            <div class="index">02 / CARRY</div>
+            <h3>MeshCore protocol</h3>
+            <p>A sub-GHz LoRa mesh built for very small frames and broken paths.</p>
+            <ul>
+              <li>Multi-hop store-and-forward routing</li>
+              <li>Dynamic failover and link-health rating</li>
+              <li>Cryptographically signed broadcast frames</li>
+              <li>Fast emergency SOS propagation</li>
+              <li>Local offline frame caching</li>
+              <li>No central server in the path</li>
+            </ul>
+          </article>
+          <article class="card">
+            <div class="index">03 / WARN</div>
+            <h3>Civic resilience</h3>
+            <p>A direct line into community disaster preparedness, built to be fixed in the field.</p>
+            <ul>
+              <li>Dam spillway and surge alerts</li>
+              <li>Barangay warning-siren triggers</li>
+              <li>Low-cost household receiver beacons</li>
+              <li>Segmented conservation data</li>
+              <li>Field-swappable modules</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="specs">
+        <p class="section-kicker">02 — Field node</p>
+        <h2>Hardware specification</h2>
+        <p class="section-intro">A field-node bill of materials aimed at monsoon exposure, silt, and a long service life.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Subsystem</th>
+                <th scope="col">Component</th>
+                <th scope="col">Role</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td data-label="Subsystem">Compute</td>
+                <td data-label="Component">ESP32-S3 dual-core Xtensa LX7</td>
+                <td data-label="Role">Edge processing, sensor aggregation, frame signing</td>
+              </tr>
+              <tr>
+                <td data-label="Subsystem">Radio</td>
+                <td data-label="Component">Semtech SX1276 LoRa</td>
+                <td data-label="Role">Sub-GHz mesh at 433, 868, or 915 MHz</td>
+              </tr>
+              <tr>
+                <td data-label="Subsystem">Power buffer</td>
+                <td data-label="Component">LiFePO4 / LTO storage</td>
+                <td data-label="Role">Always-on power with high thermal tolerance</td>
+              </tr>
+              <tr>
+                <td data-label="Subsystem">Harvester</td>
+                <td data-label="Component">5 W rugged ETFE monocrystalline panel</td>
+                <td data-label="Role">Off-grid solar recharge</td>
+              </tr>
+              <tr>
+                <td data-label="Subsystem">Enclosure</td>
+                <td data-label="Component">UV-stabilized polycarbonate, IP68</td>
+                <td data-label="Role">Submersible shell, potted electronics</td>
+              </tr>
+              <tr>
+                <td data-label="Subsystem">Uplinks</td>
+                <td data-label="Component">Cellular, Starlink, or a local gateway</td>
+                <td data-label="Role">Optional sync after the mesh has already delivered the alert</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="topology">
+        <p class="section-kicker">03 — Corridor</p>
+        <h2>Pilot deployment: Cagayan River Basin</h2>
+        <p class="section-intro">A five-node corridor for proving multi-hop routing, surge-warning speed, and hardware that can sit unattended.</p>
+        <div class="grid-2">
+          <article class="card basin-card">
+            <svg class="basin" viewBox="0 0 460 640" role="img" aria-labelledby="basin-title basin-desc">
+              <title id="basin-title">Five-node pilot topology</title>
+              <desc id="basin-desc">Upstream sensing nodes link through a ridgeline relay to a regional gateway and a barangay alert node. A dashed path skips the relay when the ridge link fails.</desc>
+              <path class="river" d="M64 16 C78 70 46 110 64 168 C86 230 150 248 176 286 C130 340 46 360 64 420 C80 490 48 530 64 600"/>
+              <path class="fail-line" d="M50 192 C32 255 32 345 50 404"/>
+              <text class="amber" transform="rotate(-90 14 300)" x="14" y="300" font-size="11" text-anchor="middle">failover</text>
+              <path class="flow-line" d="M64 62 V162"/>
+              <path class="flow-line" d="M64 190 C64 232 148 244 172 270"/>
+              <path class="flow-line" d="M172 302 C140 352 64 368 64 402"/>
+              <path class="flow-line" d="M64 430 V516"/>
+
+              <g>
+                <circle cx="64" cy="48" r="14" fill="none" stroke="#00e5ff" stroke-opacity="0.35"/>
+                <circle cx="64" cy="48" r="5.5" fill="#00e5ff"/>
+                <text x="96" y="44" font-size="15">Upstream sensing</text>
+                <text class="role" x="96" y="64" font-size="12">canyon · flash surge</text>
+              </g>
+              <g>
+                <circle cx="64" cy="176" r="14" fill="none" stroke="#00e5ff" stroke-opacity="0.35"/>
+                <circle cx="64" cy="176" r="5.5" fill="#00e5ff"/>
+                <text x="96" y="172" font-size="15">Secondary upstream</text>
+                <text class="role" x="96" y="192" font-size="12">rate-of-rise check</text>
+              </g>
+              <g>
+                <circle cx="188" cy="286" r="16" fill="none" stroke="#e5c07b"/>
+                <circle cx="188" cy="286" r="5.5" fill="#e5c07b"/>
+                <text x="216" y="282" font-size="15">Ridgeline relay</text>
+                <text class="role" x="216" y="302" font-size="12">line-of-sight span</text>
+              </g>
+              <g>
+                <circle cx="64" cy="416" r="14" fill="none" stroke="#00e5ff" stroke-opacity="0.35"/>
+                <circle cx="64" cy="416" r="5.5" fill="#00e5ff"/>
+                <text x="96" y="412" font-size="15">Regional gateway</text>
+                <text class="role" x="96" y="432" font-size="12">edge buffer · intermittent uplink</text>
+              </g>
+              <g>
+                <circle cx="64" cy="530" r="14" fill="none" stroke="#e5c07b"/>
+                <circle cx="64" cy="530" r="5.5" fill="#e5c07b"/>
+                <text x="96" y="526" font-size="15">Community alert</text>
+                <text class="role" x="96" y="546" font-size="12">sirens · household beacons</text>
+              </g>
+            </svg>
+            <p class="caption">Topological schematic. Distances are not to scale. Cyan is the primary path. Amber is failover.</p>
+          </article>
+
+          <div class="stack">
+            <article class="card">
+              <div class="index">TOPOLOGY</div>
+              <h3>Five roles, one corridor</h3>
+              <ul>
+                <li><strong>Upstream sensing.</strong> High-gradient canyon node. First to see a flash surge.</li>
+                <li><strong>Secondary upstream.</strong> Checks rate-of-rise so a single bad reading does not raise the alarm.</li>
+                <li><strong>Ridgeline relay.</strong> Elevated line-of-sight hop across terrain the river path cannot cross.</li>
+                <li><strong>Regional gateway.</strong> Local buffer. Syncs outward only when Starlink or cellular is actually up.</li>
+                <li><strong>Community alert.</strong> Barangay endpoint for sirens, beacons, and the last-mile warning.</li>
+              </ul>
+            </article>
+            <article class="card">
+              <div class="index">COMMONS</div>
+              <h3>Open hardware, paid fieldwork</h3>
+              <p>
+                UpstreamMesh is an open-source commons. The work that gets paid is ruggedized assembly, field deployment, installation, and fitting a corridor to a specific municipality.
+              </p>
+              <ul class="constraints">
+                <li>No required cloud</li>
+                <li>No SaaS tier</li>
+                <li>No vendor lock-in</li>
+                <li>No data harvesting</li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <div>UPSTREAMMESH · FOSS ENVIRONMENTAL TELEMETRY</div>
+    <div><a href="https://upstreammesh.org/">upstreammesh.org</a></div>
+    <div><a href="https://github.com/Is0cre/UpstreamMesh" target="_blank" rel="noopener">github.com/Is0cre/UpstreamMesh</a></div>
+  </footer>
+</body>
+</html>
