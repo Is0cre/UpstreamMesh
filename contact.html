@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact · UpstreamMesh</title>
+  <meta name="description" content="Write to the person paying for the first five UpstreamMesh nodes.">
+  <meta name="theme-color" content="#f4efe6">
+  <link rel="canonical" href="https://upstreammesh.org/contact.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <meta property="og:title" content="Contact · UpstreamMesh">
+  <meta property="og:description" content="Write to the person paying for the first five UpstreamMesh nodes.">
+  <meta property="og:url" content="https://upstreammesh.org/contact.html">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://upstreammesh.org/images/flood-vamco.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="logo" href="index.html"><span class="up">upstream</span><span class="mesh">mesh</span></a>
+      <nav aria-label="Primary">
+        <a href="index.html">Home</a>
+        <a href="why.html">Why</a>
+        <a href="build.html">The five</a>
+        <a href="protocol.html">Protocol</a>
+        <a href="hardware.html">Hardware</a>
+        <a href="contact.html" aria-current="page">Contact</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main" class="page">
+    <div class="wrap">
+      <p class="kicker">Contact</p>
+      <h1>Write to the person paying for it.</h1>
+      <p class="lede">One person reads this. If you live on the river, if a node can stand on your ground, or if this draft is wrong, say so.</p>
+      <p id="form-thanks" hidden>Received. I will read it.</p>
+      <form class="contact-form" action="https://formsubmit.co/mapa3578@gmail.com" method="POST">
+        <input type="hidden" name="_subject" value="UpstreamMesh">
+        <input type="hidden" name="_next" value="https://upstreammesh.org/contact.html?sent=1">
+        <input type="hidden" name="_captcha" value="true">
+        <input type="hidden" name="_template" value="table">
+        <input class="hp" type="text" name="_honey" tabindex="-1" autocomplete="off" aria-hidden="true">
+        <label>Name
+          <input name="name" type="text" required autocomplete="name" maxlength="120">
+        </label>
+        <label>Email
+          <input name="email" type="email" required autocomplete="email" maxlength="160">
+        </label>
+        <label>Where you are <span class="muted">(optional)</span>
+          <input name="where" type="text" maxlength="160">
+        </label>
+        <label>Message
+          <textarea name="message" required maxlength="4000"></textarea>
+        </label>
+        <button class="btn" type="submit">Send</button>
+      </form>
+      <p class="muted">Or open an issue on <a href="https://github.com/Is0cre/UpstreamMesh/issues/new">GitHub</a>. That path does not depend on this form.</p>
+    </div>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <div>Self-funded. Five nodes. Not a deployment.</div>
+      <div><a href="https://github.com/Is0cre/UpstreamMesh">GitHub</a> · <a href="https://github.com/meshcore-dev/MeshCore">MeshCore</a></div>
+    </div>
+  </footer>
+  <script>
+    if (new URLSearchParams(location.search).get("sent") === "1") {
+      var thanks = document.getElementById("form-thanks");
+      if (thanks) thanks.hidden = false;
+    }
+  </script>
+</body>
+</html>

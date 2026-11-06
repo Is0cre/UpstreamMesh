@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hardware · UpstreamMesh</title>
+  <meta name="description" content="Draft parts for five flood nodes: ESP32-S3, SX1276, LiFePO4, a gasketed box. The photos are study models, not hardware that exists.">
+  <meta name="theme-color" content="#f4efe6">
+  <link rel="canonical" href="https://upstreammesh.org/hardware.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <meta property="og:title" content="Hardware · UpstreamMesh">
+  <meta property="og:description" content="Draft parts for five flood nodes. The photos are study models, not hardware that exists.">
+  <meta property="og:url" content="https://upstreammesh.org/hardware.html">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://upstreammesh.org/images/node.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="logo" href="index.html"><span class="up">upstream</span><span class="mesh">mesh</span></a>
+      <nav aria-label="Primary">
+        <a href="index.html">Home</a>
+        <a href="why.html">Why</a>
+        <a href="build.html">The five</a>
+        <a href="protocol.html">Protocol</a>
+        <a href="hardware.html" aria-current="page">Hardware</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main" class="page">
+    <div class="wrap">
+      <p class="kicker">Hardware</p>
+      <h1>Parts a barangay can replace.</h1>
+      <p class="lede">The photos are study models drawn for this page, not hardware I own. The first five use a gasket and screws, so a dead node can be opened. The rules under the photos are the repair bar. They are not true of a built box yet.</p>
+
+      <div class="split">
+        <figure class="figure">
+          <img src="images/node.jpg" width="1248" height="832" alt="Study model of a small sealed field box with a solar lid, a short antenna, and a cable gland, sitting on wet stone.">
+          <figcaption>Study model of a field node. Solar lid, whip, cable gland. Not a built unit.</figcaption>
+        </figure>
+        <figure class="figure">
+          <img src="images/watch.jpg" width="1248" height="832" alt="Study model of a thick sealed wrist device with a solar face and one guarded button, and no screen.">
+          <figcaption>Study model of a later household alert. No screen. One button. Not part of the first five.</figcaption>
+        </figure>
+      </div>
+
+      <div class="cards">
+        <article class="card">
+          <h3>Compute and radio</h3>
+          <p>Edge node, not a gateway PC. The radio firmware we intend to stand on is <a href="https://github.com/meshcore-dev/MeshCore">MeshCore</a>.</p>
+          <ul>
+            <li><strong>ESP32-S3</strong> for sensors, sleep, and the frame.</li>
+            <li><strong>SX1276</strong> for the sub-GHz hop. 433, 868, or 915 MHz, whichever the site is allowed to use.</li>
+            <li><strong>A short tag</strong> on the flood frame before it is forwarded. Four bytes, not a full signature. See the <a href="protocol.html">protocol</a> page.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Power</h3>
+          <p>All five nodes carry the same kind of pack. A watch, if it is ever built, gets a different cell because it is a different job.</p>
+          <ul>
+            <li><strong>Node:</strong> LiFePO4, a cutoff so it is not flattened, and a small panel. That is the stress test.</li>
+            <li><strong>Watch, later:</strong> LTO, because a deep discharge hurts it less. Not on the first five.</li>
+            <li><strong>Harvest:</strong> a small panel on every node that stays outside. Five watts is a target, not a part I have bought.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Sensing</h3>
+          <p>The first five carry stage. Rain if a tipping bucket is cheap enough. The rest of this list waits until a corridor has stayed up.</p>
+          <ul>
+            <li><strong>Stage and rain:</strong> non-contact level, tipping bucket.</li>
+            <li><strong>Water, later:</strong> turbidity, pH, conductivity, temperature.</li>
+            <li><strong>Ground and sound, later:</strong> a geophone, and a hydrophone on its own path so a flood alert is never blocked behind an audio file.</li>
+          </ul>
+        </article>
+      </div>
+
+      <h2>Roles</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Role</th>
+              <th scope="col">Draft build</th>
+              <th scope="col">What failure looks like</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="Role">Sensing node</td>
+              <td data-label="Draft build">ESP32-S3, SX1276, LiFePO4, small solar panel</td>
+              <td data-label="What failure looks like">Keeps a local cache. Does not need the gateway to decide that the river is rising.</td>
+            </tr>
+            <tr>
+              <td data-label="Role">Ridgeline relay</td>
+              <td data-label="Draft build">Same radio, a better antenna, store-and-forward</td>
+              <td data-label="What failure looks like">If the second canyon node goes quiet, the first node aims a slower frame at the ridge directly.</td>
+            </tr>
+            <tr>
+              <td data-label="Role">Regional gateway</td>
+              <td data-label="Draft build">Edge buffer, uplink only when Starlink or cellular is actually up</td>
+              <td data-label="What failure looks like">The mesh still forwards. The uplink is a copy, not the alarm path.</td>
+            </tr>
+            <tr>
+              <td data-label="Role">Conservation audio</td>
+              <td data-label="Draft build">Hydrophone on a separate stream</td>
+              <td data-label="What failure looks like">Audio never shares the alert queue. A recording can wait. A surge cannot. Not on the first five.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2>Repair rules</h2>
+      <p>These are the rules the first five are meant to test. No connector has been chosen. No box has been built.</p>
+      <div class="cards">
+        <article class="card">
+          <h3>Plugs that do not fit wrong</h3>
+          <p>Each lead gets a shape of its own. The panel plug does not seat in the sensor socket. Polarity is not a guess.</p>
+          <ul class="plugs">
+            <li><span class="swatch blue" aria-hidden="true"></span> Blue. Level and rain.</li>
+            <li><span class="swatch amber" aria-hidden="true"></span> Amber. Panel.</li>
+            <li><span class="swatch red" aria-hidden="true"></span> Red. LiFePO4 pack.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Swap a part, no compiler</h3>
+          <p>The aim is that a new sensor, snapped on, is recognized at boot and the frame changes to match. The first firmware can be dumber than that. If a swap needs a laptop, the rule has failed.</p>
+        </article>
+        <article class="card">
+          <h3>One button, no screen</h3>
+          <p>Press it. The blink says what to carry back up the hill.</p>
+          <div class="blinks">
+            <div><strong class="g">Green</strong> Leave it.</div>
+            <div><strong class="a">Amber</strong> Pack.</div>
+            <div><strong class="b">Blue</strong> Sensor lead.</div>
+            <div><strong class="r">Red</strong> Radio.</div>
+          </div>
+        </article>
+      </div>
+      <p class="muted">A drawing in the lid, sealed in, with pictures instead of a language. The first five will show whether a stranger can follow it. The note on the outside of the box, in the language spoken there, is a separate thing. That language is not chosen yet.</p>
+
+      <h2>A watch, after the corridor stays up</h2>
+      <p>A phone dies with the grid and the cell site. The household form of this is a sealed wrist device: solar, one button, a buzzer, a motor. It is not part of the first five. Those end in a log, and a buzzer only while a person is there to hear a false alarm and forgive it.</p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Choice</th>
+              <th scope="col">Draft</th>
+              <th scope="col">Why</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td data-label="Choice">Phantom time</td>
+              <td data-label="Draft">No RTC chip and no coin cell</td>
+              <td data-label="Why">After boot the watch has uptime only. The first signed beacon sets network time. Until then it can still sound if the frame says surge.</td>
+            </tr>
+            <tr>
+              <td data-label="Choice">LTO cell</td>
+              <td data-label="Draft">Lithium titanate, plus a tiny panel</td>
+              <td data-label="Why">Chosen because a deep discharge and tropical heat hurt it less than other lithium cells. Cycle life is a property of the cell we buy, not a promise of years.</td>
+            </tr>
+            <tr>
+              <td data-label="Choice">Potting</td>
+              <td data-label="Draft">Resin around the electronics</td>
+              <td data-label="Why">The watch is not meant to be opened. Condensation and a flood are the environment, so the shell is the maintenance plan. The river nodes are the opposite: screws, not resin.</td>
+            </tr>
+            <tr>
+              <td data-label="Choice">Both ways</td>
+              <td data-label="Draft">Buzzer, motor, guarded button</td>
+              <td data-label="Why">A surge from upstream wakes the household. The button sends a distress frame back toward the barangay hall.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <div>Self-funded. Five nodes. Not a deployment.</div>
+      <div><a href="https://github.com/Is0cre/UpstreamMesh">GitHub</a> · <a href="https://github.com/meshcore-dev/MeshCore">MeshCore</a></div>
+    </div>
+  </footer>
+</body>
+</html>

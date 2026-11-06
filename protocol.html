@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Protocol · UpstreamMesh</title>
+  <meta name="description" content="MeshCore carries the packets. A 12-byte flood frame is a draft of what rides inside that mesh. It is not implemented.">
+  <meta name="theme-color" content="#f4efe6">
+  <link rel="canonical" href="https://upstreammesh.org/protocol.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <meta property="og:title" content="Protocol · UpstreamMesh">
+  <meta property="og:description" content="MeshCore carries the packets. A 12-byte flood frame is a draft inside that mesh. It is not implemented.">
+  <meta property="og:url" content="https://upstreammesh.org/protocol.html">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://upstreammesh.org/images/flood-vamco.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="logo" href="index.html"><span class="up">upstream</span><span class="mesh">mesh</span></a>
+      <nav aria-label="Primary">
+        <a href="index.html">Home</a>
+        <a href="why.html">Why</a>
+        <a href="build.html">The five</a>
+        <a href="protocol.html" aria-current="page">Protocol</a>
+        <a href="hardware.html">Hardware</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main" class="page">
+    <div class="wrap">
+      <p class="kicker">Protocol</p>
+      <h1>MeshCore moves the packets.</h1>
+      <p class="lede">The radio layer is <a href="https://github.com/meshcore-dev/MeshCore">MeshCore</a>, the open LoRa mesh from meshcore-dev. UpstreamMesh is the flood sensing we are building on top of it. We do not maintain MeshCore, and this page is not their documentation.</p>
+      <p>Their site is <a href="https://meshcore.io">meshcore.io</a>. Supported radios are flashed from <a href="https://meshcore.io/flasher">meshcore.io/flasher</a>. The library is MIT licensed. Companion, repeater, room, and sensor roles already exist there. How the five nodes map onto those roles is still open.</p>
+      <p>The twelve bytes further down are a draft of a flood payload carried inside that mesh. They are not MeshCore's own packet format, and they are not implemented. The picture is a model of five roles along one river. Distances are absent because they are not measured. Nothing starts until you press a button.</p>
+
+      <h2>Five roles along one river</h2>
+      <div class="tracer">
+        <div class="tracer-map">
+          <div class="hud">
+            <span>Model. Not a map of sites.</span>
+            <div>
+              <button type="button" class="sim-btn" id="btn-heartbeat" onclick="runSim('heartbeat', this)">Heartbeat</button>
+              <button type="button" class="sim-btn" onclick="runSim('flood', this)">Surge</button>
+              <button type="button" class="sim-btn" onclick="runSim('failover', this)">Failover</button>
+            </div>
+          </div>
+          <div class="map-panel">
+<svg class="topology-svg" viewBox="0 0 760 430" role="img" aria-labelledby="topo-title topo-desc">
+              <title id="topo-title">Five-node corridor model</title>
+              <desc id="topo-desc">Upstream sensing, a second check, a ridgeline relay, a regional gateway, and the end of the valley. Amber is the direct failover when the second node does not answer.</desc>
+              <path d="M 95,28 C 140,120 210,160 260,220 C 310,280 370,320 490,375 L 660,408" fill="none" stroke="rgba(0,229,255,0.22)" stroke-width="18" stroke-linecap="round"/>
+              <path d="M 95,28 C 140,120 210,160 260,220 C 310,280 370,320 490,375 L 660,408" fill="none" stroke="rgba(0,229,255,0.55)" stroke-width="2" stroke-dasharray="6 6"/>
+              <line x1="125" y1="78" x2="250" y2="198" stroke="#00e5ff" stroke-width="1.8" stroke-dasharray="5 5" opacity="0.7"/>
+              <line id="link-2-3" x1="250" y1="198" x2="435" y2="98" stroke="#00e5ff" stroke-width="2.2" stroke-dasharray="5 5" opacity="0.85"/>
+              <line id="link-1-3" x1="125" y1="78" x2="435" y2="98" stroke="#f59e0b" stroke-width="1.8" stroke-dasharray="4 4" opacity="0.28"/>
+              <line x1="435" y1="98" x2="585" y2="218" stroke="#00e5ff" stroke-width="2.2" stroke-dasharray="5 5" opacity="0.85"/>
+              <line x1="435" y1="98" x2="485" y2="348" stroke="#00e5ff" stroke-width="2.2" stroke-dasharray="5 5" opacity="0.85"/>
+              <line x1="585" y1="218" x2="485" y2="348" stroke="#00e5ff" stroke-width="1.6" stroke-dasharray="5 5" opacity="0.55"/>
+              <text id="failover-label" x="148" y="118" fill="#f59e0b" font-family="monospace" font-size="11" opacity="0.4">direct failover</text>
+              <circle id="packet-dot" cx="125" cy="78" r="6" fill="#00e5ff" opacity="0"/>
+
+              <g role="button" tabindex="0" aria-label="Node 1, upstream canyon sensor" onclick="selectNode(1)" onkeydown="nodeKey(event, 1)">
+                <circle cx="125" cy="78" r="12" fill="#0d1117" stroke="#00e5ff" stroke-width="2.5"/>
+                <circle cx="125" cy="78" r="4" fill="#00e5ff"/>
+                <rect x="36" y="34" width="168" height="26" rx="3" fill="rgba(7,9,11,0.88)" stroke="#304156"/>
+                <text x="44" y="51" fill="#e6edf3" font-family="monospace" font-size="11">N01 upstream canyon</text>
+              </g>
+              <g role="button" tabindex="0" aria-label="Node 2, second upstream check" onclick="selectNode(2)" onkeydown="nodeKey(event, 2)">
+                <circle id="node2-ring" cx="250" cy="198" r="12" fill="#0d1117" stroke="#00e5ff" stroke-width="2.5"/>
+                <circle cx="250" cy="198" r="4" fill="#00e5ff"/>
+                <rect x="148" y="216" width="176" height="26" rx="3" fill="rgba(7,9,11,0.88)" stroke="#304156"/>
+                <text x="156" y="233" fill="#e6edf3" font-family="monospace" font-size="11">N02 rate-of-rise check</text>
+              </g>
+              <g role="button" tabindex="0" aria-label="Node 3, ridgeline relay" onclick="selectNode(3)" onkeydown="nodeKey(event, 3)">
+                <circle cx="435" cy="98" r="14" fill="#0d1117" stroke="#f59e0b" stroke-width="2.5"/>
+                <circle cx="435" cy="98" r="5" fill="#f59e0b"/>
+                <rect x="352" y="50" width="168" height="26" rx="3" fill="rgba(7,9,11,0.88)" stroke="#f59e0b"/>
+                <text x="360" y="67" fill="#f59e0b" font-family="monospace" font-size="11">N03 ridgeline relay</text>
+              </g>
+              <g role="button" tabindex="0" aria-label="Node 4, regional gateway" onclick="selectNode(4)" onkeydown="nodeKey(event, 4)">
+                <circle cx="585" cy="218" r="13" fill="#0d1117" stroke="#10b981" stroke-width="2.5"/>
+                <circle cx="585" cy="218" r="4" fill="#10b981"/>
+                <rect x="508" y="236" width="176" height="26" rx="3" fill="rgba(7,9,11,0.88)" stroke="#10b981"/>
+                <text x="516" y="253" fill="#10b981" font-family="monospace" font-size="11">N04 regional gateway</text>
+              </g>
+              <g role="button" tabindex="0" aria-label="Node 5, end of the valley" onclick="selectNode(5)" onkeydown="nodeKey(event, 5)">
+                <circle cx="485" cy="348" r="13" fill="#0d1117" stroke="#ff3b5c" stroke-width="2.5"/>
+                <circle cx="485" cy="348" r="4" fill="#ff3b5c"/>
+                <rect x="372" y="368" width="196" height="26" rx="3" fill="rgba(7,9,11,0.88)" stroke="#ff3b5c"/>
+                <text x="380" y="385" fill="#ff9aab" font-family="monospace" font-size="11">N05 end of the valley</text>
+              </g>
+            </svg>
+          </div>
+          <p class="muted status" id="sim-status-label">Model idle. Cyan is the path. Amber is failover.</p>
+        </div>
+        <div class="console">
+          <header>Worked example. <strong>Not a packet capture.</strong></header>
+          <div class="log" id="packet-log" aria-live="polite">
+            <p>Idle. Choose heartbeat, surge, or failover. The lines are one pass of the 12-byte draft, in order.</p>
+          </div>
+          <div class="detail" id="node-inspector">
+            <h4>N01 · Upstream canyon</h4>
+            <p>First sensor on a high-gradient reach. It reads stage. A second node has to agree before that rise becomes an alert.</p>
+          </div>
+        </div>
+      </div>
+      <p class="muted">The gorge behind the lines is a study illustration, not a survey. Click a node to read its role. The same rules are written out in <a href="docs/first-five.md">docs/first-five.md</a>.</p>
+
+      <h2>Sleep until the beacon</h2>
+      <p>A LoRa radio that listens all the time draws on the order of 10 mA. That empties a small pack. The draft sleeps, then wakes for one beacon. The listen window has to cover that beacon's airtime. At SF10 and 125 kHz a 12-byte frame is on the air for a few hundred milliseconds, so a short slot only works if the beacon uses a faster spreading factor. A weak hop can drop to a slower one.</p>
+      <p>This is a power goal for the sensor nodes. MeshCore does not use this schedule. How it would sit on a MeshCore repeater or companion is still open.</p>
+      <svg class="scope" viewBox="0 0 1000 250" role="img" aria-label="Sketch of current draw and a chirp waveform. Sleep, two listen slots, then a longer alert transmission. Not a capture from a scope.">
+            <g stroke="rgba(28,36,48,0.08)" stroke-width="1">
+              <line x1="0" y1="50" x2="1000" y2="50"/><line x1="0" y1="100" x2="1000" y2="100"/>
+              <line x1="0" y1="150" x2="1000" y2="150"/><line x1="0" y1="200" x2="1000" y2="200"/>
+              <line x1="150" y1="0" x2="150" y2="250"/><line x1="350" y1="0" x2="350" y2="250"/>
+              <line x1="550" y1="0" x2="550" y2="250"/><line x1="750" y1="0" x2="750" y2="250"/>
+            </g>
+            <text x="15" y="28" fill="#5c6570" font-family="ui-monospace, monospace" font-size="12">Current, qualitative</text>
+            <path d="M 15,85 L 210,85 L 210,40 L 280,40 L 280,85 L 580,85 L 580,40 L 650,40 L 650,85 L 760,85 L 760,22 L 900,22 L 900,85 L 985,85" fill="none" stroke="#0e5f78" stroke-width="2.2"/>
+            <text x="70" y="74" fill="#5c6570" font-family="ui-monospace, monospace" font-size="11">asleep</text>
+            <text x="196" y="32" fill="#0e5f78" font-family="ui-monospace, monospace" font-size="11">listen</text>
+            <text x="566" y="32" fill="#0e5f78" font-family="ui-monospace, monospace" font-size="11">listen</text>
+            <text x="755" y="16" fill="#8d2e24" font-family="ui-monospace, monospace" font-size="11">alert transmit</text>
+            <text x="15" y="132" fill="#5c6570" font-family="ui-monospace, monospace" font-size="12">Chirp, qualitative. Bandwidth and spreading factor are a site choice.</text>
+            <path d="M 15,195 L 210,195 L 228,150 L 228,195 L 246,150 L 246,195 L 264,150 L 264,195 L 580,195 L 598,150 L 598,195 L 616,150 L 616,195 L 634,150 L 634,195 L 760,195 L 778,145 L 778,195 L 796,145 L 796,195 L 814,145 L 814,195 L 832,145 L 832,195 L 850,145 L 850,195 L 985,195" fill="none" stroke="#c4511a" stroke-width="1.8"/>
+            <text x="210" y="230" fill="#c4511a" font-family="ui-monospace, monospace" font-size="11">beacon</text>
+            <text x="760" y="230" fill="#8d2e24" font-family="ui-monospace, monospace" font-size="11">longer alert frame</text>
+          </svg>
+      <p class="muted">SX1276 receive current is about 10–12 mA in the datasheet. Transmit current depends on power. Sleep current of a whole node depends on the regulator, and it will not be the chip's deep-sleep figure. Those are bounds for the design, not a measurement of a built unit.</p>
+
+      <h2>A 12-byte draft, and no more</h2>
+      <p>Heartbeat, telemetry, and the alert share one layout so a small receiver can parse it. The last four bytes are a truncated tag plus a counter. That raises the cost of a blind forgery. It is not a full HMAC-SHA256, and it does not by itself stop a determined attacker. The plain-text copy is <a href="docs/frame.md">docs/frame.md</a>.</p>
+      <div class="bytes">
+        <article class="byte">
+          <div class="off">Byte 0</div>
+          <h3>Type</h3>
+          <p>0x01 heartbeat and time. 0x02 sensor report. 0xFF emergency alert.</p>
+        </article>
+        <article class="byte">
+          <div class="off">Bytes 1–4</div>
+          <h3>Network time</h3>
+          <p>uint32 seconds. The gateway's notion of UTC. A node that just booted has only its own uptime until it hears one.</p>
+        </article>
+        <article class="byte">
+          <div class="off">Byte 5</div>
+          <h3>Basin state</h3>
+          <p>0 nominal, 1 advisory, 2 surge. On the first five, surge is the frame and the log, plus a buzzer if someone is there.</p>
+        </article>
+        <article class="byte">
+          <div class="off">Bytes 6–7</div>
+          <h3>Stage delta</h3>
+          <p>int16 centimeters from the node's own baseline. Two upstream nodes have to agree before it becomes an alert.</p>
+        </article>
+        <article class="byte mesh">
+          <div class="off">Bytes 8–11</div>
+          <h3>Tag</h3>
+          <p>Four bytes. A truncated authenticator and a counter, so a replay of an old surge is obvious. A budget choice, not a security proof.</p>
+        </article>
+      </div>
+    </div>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <div>Self-funded. Five nodes. Not a deployment.</div>
+      <div><a href="https://github.com/Is0cre/UpstreamMesh">GitHub</a> · <a href="https://github.com/meshcore-dev/MeshCore">MeshCore</a></div>
+    </div>
+  </footer>
+  <script>
+    const logEl = document.getElementById("packet-log");
+    const statusEl = document.getElementById("sim-status-label");
+    const dot = document.getElementById("packet-dot");
+    const link23 = document.getElementById("link-2-3");
+    const link13 = document.getElementById("link-1-3");
+    const failoverLbl = document.getElementById("failover-label");
+    const node2Ring = document.getElementById("node2-ring");
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let timer = null;
+
+    const nodeDetails = {
+      1: ["N01 · Upstream canyon", "First sensor on a high-gradient reach. It reads stage. It does not raise an alert on its own."],
+      2: ["N02 · Second check", "Repeats the rate of rise. A surge is only an alert after this node agrees, so debris on one sensor is not a flood."],
+      3: ["N03 · Ridgeline relay", "The hop that can see past the gorge. Stores frames and forwards them. If N02 is silent, N01 addresses this node directly, slower."],
+      4: ["N04 · Regional gateway", "Holds the local record and originates network time. Starlink or cellular is a copy of that record. The alarm does not wait for it."],
+      5: ["N05 · End of the valley", "On the first five this is a buzzer and a log. A siren stays off unless a person who lives here asks for it."]
+    };
+
+    const scenarios = {
+      heartbeat: {
+        label: "Heartbeat. One pass of the draft frame.",
+        color: "#00e5ff",
+        failover: false,
+        steps: [
+          ["N04 → mesh", "Gateway beacon. Type 0x01, network time, basin nominal.", "01 .. .. .. .. 00 00 00 .. .. .. ..", "normal", 585, 218],
+          ["N03 → mesh", "Ridge forwards the beacon. Hop count is a radio detail, not shown as measured.", "01 .. .. .. .. 00 00 00 .. .. .. ..", "normal", 435, 98],
+          ["N02 → N03", "Second node reports stage delta near its baseline.", "02 .. .. .. .. 00 00 12 .. .. .. ..", "normal", 250, 198],
+          ["N01 → N02", "Canyon node reports rain at none and returns to sleep.", "02 .. .. .. .. 00 00 04 .. .. .. ..", "normal", 125, 78],
+          ["N05", "Nodes that heard the beacon now share network time.", "01 .. .. .. .. 00 00 00 .. .. .. ..", "normal", 485, 348]
+        ]
+      },
+      flood: {
+        label: "Surge. Both upstream nodes agree, then the barangay wakes.",
+        color: "#ff3b5c",
+        failover: false,
+        steps: [
+          ["N01", "Stage delta crosses the local threshold. Type becomes 0xFF. Not a siren yet.", "FF .. .. .. .. 02 00 8E .. .. .. ..", "alert", 125, 78],
+          ["N02", "Second node sees the same rise and confirms. Now it is an alert.", "FF .. .. .. .. 02 00 8B .. .. .. ..", "alert", 250, 198],
+          ["N03", "Ridge drops the queue ahead of this frame and forwards it.", "FF .. .. .. .. 02 00 8B .. .. .. ..", "alert", 435, 98],
+          ["N05", "The frame arrives. A buzzer only if someone is there. A siren is not left running on its own.", "FF .. .. .. .. 02 00 8B .. .. .. ..", "alert", 485, 348],
+          ["N04", "Gateway writes the frame down. The warning already left.", "FF .. .. .. .. 02 00 8B .. .. .. ..", "warn", 585, 218]
+        ]
+      },
+      failover: {
+        label: "Failover. N02 is silent, so N01 addresses the ridge.",
+        color: "#f59e0b",
+        failover: true,
+        steps: [
+          ["N01 → N02", "No answer from the second node. This pass does not invent a cause.", "02 .. .. .. .. 00 .. .. .. .. .. ..", "warn", 125, 78],
+          ["N01", "Route changes. Slower spreading factor, aimed at N03.", "02 .. .. .. .. 00 .. .. .. .. .. ..", "warn", 125, 78],
+          ["N03", "Ridge accepts the direct frame and stores it.", "02 .. .. .. .. 00 .. .. .. .. .. ..", "normal", 435, 98],
+          ["N05", "The barangay still receives the report. The missing node is noted, not hidden.", "02 .. .. .. .. 00 .. .. .. .. .. ..", "normal", 485, 348]
+        ]
+      }
+    };
+
+    function nodeKey(event, id) {
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        selectNode(id);
+      }
+    }
+
+    function selectNode(id) {
+      const card = document.getElementById("node-inspector");
+      const [title, desc] = nodeDetails[id];
+      card.replaceChildren();
+      const h = document.createElement("h4");
+      const p = document.createElement("p");
+      h.textContent = title;
+      p.textContent = desc;
+      card.append(h, p);
+    }
+
+    function setFailover(on) {
+      link23.setAttribute("opacity", on ? "0.2" : "0.85");
+      link23.setAttribute("stroke", on ? "#ff3b5c" : "#00e5ff");
+      link13.setAttribute("opacity", on ? "0.95" : "0.28");
+      link13.setAttribute("stroke-width", on ? "2.4" : "1.8");
+      failoverLbl.setAttribute("opacity", on ? "1" : "0.4");
+      node2Ring.setAttribute("stroke", on ? "#ff3b5c" : "#00e5ff");
+    }
+
+    function addLog(index, hop, msg, hex, type) {
+      const row = document.createElement("div");
+      row.className = "log-entry";
+      const time = document.createElement("span");
+      time.className = "log-time";
+      time.textContent = "[t+" + (index * 1.6).toFixed(1) + "s] ";
+      const who = document.createElement("span");
+      who.className = type === "alert" ? "log-alert" : type === "warn" ? "log-warn" : "log-hop";
+      who.textContent = hop;
+      const text = document.createTextNode(": " + msg);
+      const dump = document.createElement("span");
+      dump.className = "log-hex";
+      dump.textContent = hex + "  ·  example bytes, not a capture";
+      row.append(time, who, text, dump);
+      logEl.append(row);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function runSim(mode, btn) {
+      if (timer) {
+        clearInterval(timer);
+        timer = null;
+      }
+      document.querySelectorAll(".sim-btn").forEach(function (b) { b.classList.remove("active"); });
+      if (btn) btn.classList.add("active");
+      const scene = scenarios[mode];
+      setFailover(scene.failover);
+      statusEl.textContent = scene.label;
+      dot.setAttribute("fill", scene.color);
+      dot.setAttribute("opacity", "1");
+      logEl.replaceChildren();
+      let i = 0;
+      function tick() {
+        if (i >= scene.steps.length) {
+          if (timer) {
+            clearInterval(timer);
+            timer = null;
+          }
+          return;
+        }
+        const step = scene.steps[i];
+        dot.setAttribute("cx", step[4]);
+        dot.setAttribute("cy", step[5]);
+        addLog(i, step[0], step[1], step[2], step[3]);
+        i += 1;
+      }
+      if (reduceMotion) {
+        scene.steps.forEach(function (_, idx) {
+          i = idx;
+          tick();
+        });
+        return;
+      }
+      tick();
+      timer = setInterval(tick, 1600);
+    }
+  </script>
+</body>
+</html>

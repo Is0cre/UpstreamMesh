@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The five · UpstreamMesh</title>
+  <meta name="description" content="Five self-funded nodes, left outside until they die. Places are not chosen. Boards are not bought.">
+  <meta name="theme-color" content="#f4efe6">
+  <link rel="canonical" href="https://upstreammesh.org/build.html">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <meta property="og:title" content="The five · UpstreamMesh">
+  <meta property="og:description" content="Five self-funded nodes, left outside until they die. Places are not chosen. Boards are not bought.">
+  <meta property="og:url" content="https://upstreammesh.org/build.html">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://upstreammesh.org/images/flood-vamco.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="logo" href="index.html"><span class="up">upstream</span><span class="mesh">mesh</span></a>
+      <nav aria-label="Primary">
+        <a href="index.html">Home</a>
+        <a href="why.html">Why</a>
+        <a href="build.html" aria-current="page">The five</a>
+        <a href="protocol.html">Protocol</a>
+        <a href="hardware.html">Hardware</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </div>
+  </header>
+  <main id="main" class="page">
+    <div class="wrap">
+      <p class="kicker">The build</p>
+      <h1>Five nodes, left until they die.</h1>
+      <p class="lede">This is the whole project until a dead node can say why it stopped. Places are not chosen. Boards are not bought.</p>
+      <p>One person is paying for the travel and the parts. There is no funder. The nodes stay out as a stress test. The thing I come back for is the diary in flash: voltage, time awake, and why a node last restarted.</p>
+
+      <div class="cards">
+        <article class="card">
+          <h3>What each one is</h3>
+          <ul>
+            <li><strong>N01</strong> reads the river.</li>
+            <li><strong>N02</strong> reads it again. Both have to agree.</li>
+            <li><strong>N03</strong> is a radio on a ridge. No sensor.</li>
+            <li><strong>N04</strong> keeps the log. A laptop is enough while someone is there. After that, the flash on the node is the record.</li>
+            <li><strong>N05</strong> is the end of the valley. A buzzer for the test. Not a siren left alone.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>What has to be true</h3>
+          <ul>
+            <li><strong>Power:</strong> LiFePO4 and a small panel. A power bank is a weekend, not a season.</li>
+            <li><strong>Place:</strong> above the flood, sensor looking at the water.</li>
+            <li><strong>Box:</strong> gasket and screws. Not potted. A dead node that cannot be opened teaches nothing.</li>
+            <li><strong>Diary:</strong> the last heartbeats stay in flash. Voltage, time awake, why it last restarted.</li>
+          </ul>
+        </article>
+        <article class="card">
+          <h3>Before they are left</h3>
+          <ul>
+            <li>A bucket at N01 has to reach N05 with no phone in the path.</li>
+            <li>Pull the battery on N02. The frame still arrives, the long way.</li>
+            <li>A note on the box, in the language spoken there: what it is, that it is not a bomb, and how to reach me.</li>
+            <li>A siren only if a person who sleeps near it asks for the sound.</li>
+          </ul>
+        </article>
+      </div>
+
+      <h2>How the radio is meant to work</h2>
+      <p>The packets ride on <a href="https://github.com/meshcore-dev/MeshCore">MeshCore</a>. Companion, repeater, and sensor roles already exist in that project. Which of those roles matches N01 through N05 is still open. The corridor drawn on the <a href="protocol.html">protocol</a> page is our draft of the flood path, not a MeshCore map and not a survey.</p>
+      <p>The parts list and the repair rules, which are rules and not a description of a built box, are on <a href="hardware.html">hardware</a>.</p>
+    </div>
+  </main>
+  <footer class="site-footer">
+    <div class="wrap">
+      <div>Self-funded. Five nodes. Not a deployment.</div>
+      <div><a href="https://github.com/Is0cre/UpstreamMesh">GitHub</a> · <a href="https://github.com/meshcore-dev/MeshCore">MeshCore</a></div>
+    </div>
+  </footer>
+</body>
+</html>
